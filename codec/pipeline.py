@@ -17,16 +17,20 @@ def pad_to_multiple(image: np.ndarray, multiple: int) -> np.ndarray:
     return np.pad(image, ((0, -h % multiple), (0, -w % multiple)), mode="edge")
 
 
-def keep_largest(coeffs: np.ndarray, fraction: float) -> np.ndarray:
-    count = int(round(coeffs.size * fraction))
-    if count >= coeffs.size:
-        return coeffs.copy()
-    if count <= 0:
-        return np.zeros_like(coeffs)
-    magnitude = np.abs(coeffs)
-    flat = magnitude.ravel()
-    threshold = np.partition(flat, flat.size - count)[flat.size - count]
-    return np.where(magnitude >= threshold, coeffs, 0.0)
+class RankedCoefficients:
+
+    def __init__(self, values: np.ndarray):
+        self.values = values
+        self.magnitude = np.abs(values)
+        self.ranked = np.sort(self.magnitude, axis=None)[::-1]
+
+    def keep_largest(self, fraction: float) -> np.ndarray:
+        count = int(round(self.values.size * fraction))
+        if count >= self.values.size:
+            return self.values.copy()
+        if count <= 0:
+            return np.zeros_like(self.values)
+        return np.where(self.magnitude >= self.ranked[count - 1], self.values, 0.0)
 
 
 @dataclass
@@ -52,8 +56,8 @@ class Codec:
         self.original = image
         self.levels = levels
         padded = pad_to_multiple(image, max(dct.BLOCK, 2 ** levels)).astype(float)
-        self.dct_coeffs = dct.forward(padded)
-        self.dwt_coeffs = haar.forward(padded, levels)
+        self.dct_coeffs = RankedCoefficients(dct.forward(padded))
+        self.dwt_coeffs = RankedCoefficients(haar.forward(padded, levels))
 
     def _result(self, name: str, coeffs: np.ndarray, restored: np.ndarray) -> Result:
         h, w = self.original.shape
@@ -62,9 +66,9 @@ class Codec:
                       psnr(self.original, image))
 
     def dct(self, fraction: float) -> Result:
-        coeffs = keep_largest(self.dct_coeffs, fraction)
+        coeffs = self.dct_coeffs.keep_largest(fraction)
         return self._result("DCT", coeffs, dct.inverse(coeffs))
 
     def dwt(self, fraction: float) -> Result:
-        coeffs = keep_largest(self.dwt_coeffs, fraction)
+        coeffs = self.dwt_coeffs.keep_largest(fraction)
         return self._result("DWT", coeffs, haar.inverse(coeffs, self.levels))

@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QApplication
 from viewer.styles import STYLESHEET
 from viewer.window import CompressionWindow
 
-DEFAULT_IMAGE = Path(__file__).parent / "samples" / "cameraman.png"
+DEFAULT_IMAGE = Path(__file__).parent / "samples" / "swan.png"
 
 
 def main() -> int:

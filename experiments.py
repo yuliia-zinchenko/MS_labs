@@ -11,7 +11,7 @@ from matplotlib.ticker import FuncFormatter
 
 from codec.pipeline import Codec, load_grayscale
 
-DEFAULT_IMAGE = Path(__file__).parent / "samples" / "cameraman.png"
+DEFAULT_IMAGE = Path(__file__).parent / "samples" / "swan.png"
 DEFAULT_PERCENTS = (20.0, 10.0, 5.0, 2.0, 1.0)
 CURVE_PERCENTS = np.geomspace(0.1, 100, 40)
 DCT_COLOR = "#2563eb"
@@ -23,7 +23,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("image", nargs="?", default=str(DEFAULT_IMAGE))
     parser.add_argument("--percents", type=float, nargs="+", default=DEFAULT_PERCENTS)
     parser.add_argument("--levels", type=int, default=5)
-    parser.add_argument("--crop", type=int, nargs=4, default=(60, 180, 160, 160),
+    parser.add_argument("--crop", type=int, nargs=4, default=(90, 100, 200, 200),
                         metavar=("TOP", "LEFT", "HEIGHT", "WIDTH"))
     parser.add_argument("--out", default="results")
     return parser.parse_args()

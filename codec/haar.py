@@ -25,15 +25,6 @@ def inverse_2d(x: np.ndarray) -> np.ndarray:
     return synthesize_rows(synthesize_rows(x.T).T)
 
 
-def max_levels(shape: tuple[int, int]) -> int:
-    levels = 0
-    h, w = shape
-    while h % 2 == 0 and w % 2 == 0 and min(h, w) > 1:
-        h, w = h // 2, w // 2
-        levels += 1
-    return levels
-
-
 def forward(image: np.ndarray, levels: int) -> np.ndarray:
     out = image.astype(float)
     h, w = out.shape
